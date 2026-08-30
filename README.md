@@ -1,4 +1,4 @@
-# 🌧️ Pluvial: AI Water Harvesting Intelligence
+# 🌧️ Tone: AI Water Harvesting Intelligence
 
 > **SU Ideas Festival 2026 Submission** | Reimagining Water Futures: Solutions for Clean Water and Sanitation
 
@@ -6,7 +6,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-AI-blue?style=flat)](https://deepmind.google/technologies/gemini/)
 
-Pluvial transforms raw satellite imagery and geospatial rainfall data into an actionable, bankable rainwater harvesting investment brief in under 60 seconds. We help commercial facilities in Kenya turn uncaptured rooftop runoff into automated, confidence-adjusted ROI models.
+Tone transforms raw satellite imagery and geospatial rainfall data into an actionable, bankable rainwater harvesting investment brief in under 60 seconds. We help commercial facilities in Kenya turn uncaptured rooftop runoff into automated, confidence-adjusted ROI models.
 
 ---
 
@@ -66,7 +66,7 @@ The app will be running at `http://localhost:3000`.
 ---
 
 ## 👥 The Team
-- **[]** - Full-Stack & AI Engineering
-- **[]** - []
+- Lionel Okinyi - Full-Stack & AI Engineering
+- Marylynn Wanjiru - 
 - **[]** 
 *Built with ❤️ for the SU Ideas Festival 2026.*

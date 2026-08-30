@@ -1,4 +1,4 @@
-declare module 'maplibre-gl' {
+declare namespace maplibregl {
   export class Map {
     constructor(options?: any);
     on(event: string, callback: (...args: any[]) => void): this;
@@ -46,6 +46,8 @@ declare module 'maplibre-gl' {
     extend(obj: any): this;
     [key: string]: any;
   }
-  const maplibregl: any;
-  export default maplibregl;
+}
+
+declare module 'maplibre-gl' {
+  export = maplibregl;
 }

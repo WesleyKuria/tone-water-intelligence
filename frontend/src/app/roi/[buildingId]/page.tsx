@@ -22,29 +22,27 @@ const SCENARIO_MULTIPLIERS: Record<Scenario, { rainfall: number; efficiency: num
 
 function toKpis(r: ROIResponse): RoiKpis {
   return {
-    harvestableGal:   r.harvestable_gal,
-    annualSavingsUsd: r.total_annual_savings_usd,
-    capexMidUsd:      r.capex_mid_usd,
-    paybackYrs:       r.simple_payback_yrs,
-    npv10yrUsd:       r.npv_10yr_usd,
-    baseRoiPct:       r.base_roi_pct,
-    confAdjRoiPct:    r.confidence_adj_roi_pct,
-    co2OffsetLbs:     r.co2_offset_lbs,
+    harvestableGal:   r.harvestable_gal ?? Math.round((r.harvestable_liters ?? 0) * 0.264172),
+    annualSavingsUsd: r.total_annual_savings_usd ?? 0,
+    capexMidUsd:      r.capex_mid_usd ?? 0,
+    paybackYrs:       r.simple_payback_yrs ?? 0,
+    npv10yrUsd:       r.npv_10yr_usd ?? 0,
+    baseRoiPct:       r.base_roi_pct ?? 0,
+    confAdjRoiPct:    r.confidence_adj_roi_pct ?? 0,
+    co2OffsetLbs:     r.co2_offset_lbs ?? Math.round((r.co2_offset_kg ?? 0) * 2.20462),
   };
 }
 
 function toSavings(r: ROIResponse): SavingsData {
-  const incentiveAmort = Math.max(
-    0,
-    r.total_annual_savings_usd
-      - r.annual_water_savings_usd
-      - r.annual_sewer_savings_usd
-      - r.stormwater_fee_avoidance_usd
-  );
+  const tot = r.total_annual_savings_usd ?? 0;
+  const w = r.annual_water_savings_usd ?? 0;
+  const s = r.annual_sewer_savings_usd ?? 0;
+  const st = r.stormwater_fee_avoidance_usd ?? 0;
+  const incentiveAmort = Math.max(0, tot - w - s - st);
   return {
-    waterSavingsUsd:   r.annual_water_savings_usd,
-    sewerSavingsUsd:   r.annual_sewer_savings_usd,
-    stormwaterUsd:     r.stormwater_fee_avoidance_usd,
+    waterSavingsUsd:   w,
+    sewerSavingsUsd:   s,
+    stormwaterUsd:     st,
     incentiveAmortUsd: incentiveAmort,
   };
 }
@@ -55,38 +53,43 @@ function toTableRow(
   scenario: Scenario
 ): ScenarioRow {
   const m = SCENARIO_MULTIPLIERS[scenario];
-  const incentiveAmort = Math.max(
-    0,
-    r.total_annual_savings_usd
-      - r.annual_water_savings_usd
-      - r.annual_sewer_savings_usd
-      - r.stormwater_fee_avoidance_usd
-  );
+  const tot = r.total_annual_savings_usd ?? 0;
+  const w = r.annual_water_savings_usd ?? 0;
+  const s = r.annual_sewer_savings_usd ?? 0;
+  const st = r.stormwater_fee_avoidance_usd ?? 0;
+  const incentiveAmort = Math.max(0, tot - w - s - st);
+  const rainfallIn = building.annual_rainfall_in ?? ((building.annual_rainfall_mm ?? 900) / 25.4);
+  const capex = r.capex_mid_usd ?? 0;
+  const incentive = building.incentive_value_usd ?? 0;
+
   return {
-    harvestableGal:          r.harvestable_gal,
-    annualRainfallUsed:      parseFloat((building.annual_rainfall_in * m.rainfall).toFixed(1)),
+    harvestableGal:          r.harvestable_gal ?? Math.round((r.harvestable_liters ?? 0) * 0.264172),
+    annualRainfallUsed:      parseFloat((rainfallIn * m.rainfall).toFixed(1)),
     collectionEfficiencyPct: m.efficiency * 100,
-    waterSavingsUsd:         r.annual_water_savings_usd,
-    sewerSavingsUsd:         r.annual_sewer_savings_usd,
-    stormwaterUsd:           r.stormwater_fee_avoidance_usd,
+    waterSavingsUsd:         w,
+    sewerSavingsUsd:         s,
+    stormwaterUsd:           st,
     incentiveAmortUsd:       incentiveAmort,
-    totalSavingsUsd:         r.total_annual_savings_usd,
-    capexMidUsd:             r.capex_mid_usd,
-    incentiveUsd:            building.incentive_value_usd,
-    netCapexUsd:             r.capex_mid_usd - building.incentive_value_usd,
-    paybackYrs:              r.simple_payback_yrs,
-    npv10yrUsd:              r.npv_10yr_usd,
-    baseRoiPct:              r.base_roi_pct,
-    confAdjRoiPct:           r.confidence_adj_roi_pct,
-    co2OffsetLbs:            r.co2_offset_lbs,
+    totalSavingsUsd:         tot,
+    capexMidUsd:             capex,
+    incentiveUsd:            incentive,
+    netCapexUsd:             capex - incentive,
+    paybackYrs:              r.simple_payback_yrs ?? 0,
+    npv10yrUsd:              r.npv_10yr_usd ?? 0,
+    baseRoiPct:              r.base_roi_pct ?? 0,
+    confAdjRoiPct:           r.confidence_adj_roi_pct ?? 0,
+    co2OffsetLbs:            r.co2_offset_lbs ?? Math.round((r.co2_offset_kg ?? 0) * 2.20462),
   };
 }
 
 function toCumulative(r: ROIResponse): number[] {
+  const capex = r.capex_mid_usd ?? 0;
+  const tot = r.total_annual_savings_usd ?? 0;
   return Array.from({ length: 11 }, (_, y) =>
-    -r.capex_mid_usd + r.total_annual_savings_usd * y
+    -capex + tot * y
   );
 }
+
 
 // ─── Error card ───────────────────────────────────────────────────────────────
 

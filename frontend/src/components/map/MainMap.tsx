@@ -216,7 +216,7 @@ export default function MainMap({ selection, setSelection, filteredBuildings, st
 
       let hoveredStateId: string | null = null;
 
-      map.current!.on("mousemove", "states-fill", (e) => {
+      map.current!.on("mousemove", "states-fill", (e: any) => {
         if (!e.features?.length) return;
         map.current!.getCanvas().style.cursor = "pointer";
 
@@ -272,7 +272,7 @@ export default function MainMap({ selection, setSelection, filteredBuildings, st
         setTooltip(null);
       });
 
-      map.current!.on("click", "states-fill", (e) => {
+      map.current!.on("click", "states-fill", (e: any) => {
         if (!e.features?.length) return;
         const code = e.features[0].properties.stateCode;
         setSelection(prev => ({
@@ -290,7 +290,7 @@ export default function MainMap({ selection, setSelection, filteredBuildings, st
       map.current!.on("mouseleave", "buildings-circle", () => {
         map.current!.getCanvas().style.cursor = "";
       });
-      map.current!.on("click", "buildings-circle", (e) => {
+      map.current!.on("click", "buildings-circle", (e: any) => {
         if (!e.features?.length) return;
         const buildingId = e.features[0].properties.building_id;
         setSelection(prev => ({

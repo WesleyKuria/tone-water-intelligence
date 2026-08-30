@@ -69,17 +69,22 @@ function toReportData(
     { label: "CapEx Midpoint",      value: fmtCurrency(capexMid, sym),                            sub: `Range: ${fmtCurrency(capexLow, sym)} – ${fmtCurrency(capexHigh, sym)}` },
   ];
 
+  const waterSavings = roi.annual_water_savings_usd ?? 0;
+  const sewerSavings = roi.annual_sewer_savings_usd ?? 0;
+  const stormwaterSavings = roi.stormwater_fee_avoidance_usd ?? 0;
+  const incentiveUsd = building.incentive_value_usd ?? 0;
+  const incentiveAmort = Math.max(0, (roi.total_annual_savings_usd ?? 0) - waterSavings - sewerSavings - stormwaterSavings);
 
   const esgBullets = [
     `CV confidence score of ${cvPct}% reflects satellite-derived detection certainty for physical signals including roof geometry${brief.physical_suitability.cooling_tower_detected ? " and cooling tower activity" : ""}.`,
-    `CO₂ offset of ${(roi.co2_offset_lbs / 1000).toFixed(1)}K lbs/yr represents direct scope 3 emissions reduction via potable water demand avoidance.`,
-    `10-year NPV of ${fmtUsd(roi.npv_10yr_usd)} at a 5% discount rate demonstrates durable financial value well beyond the initial payback horizon.`,
+    `CO₂ offset of ${((roi.co2_offset_kg ?? 0) / 1000).toFixed(1)} tons/yr represents direct scope 3 emissions reduction via potable water demand avoidance.`,
+    `10-year NPV of ${fmtCurrency(npvVal, sym)} at market discount rate demonstrates durable financial value well beyond the initial payback horizon.`,
     ...(building.sbti_committed
       ? ["Building operator is publicly committed to Science Based Targets initiative (SBTi), requiring measurable water stewardship progress at the facility level."]
       : []),
   ];
 
-  const nextStepOrder = (n: number) => building.incentive_value_usd > 0 ? String(n) : String(n - 1);
+  const nextStepOrder = (n: number) => incentiveUsd > 0 ? String(n) : String(n - 1);
 
   return {
     generatedAt: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
@@ -91,16 +96,16 @@ function toReportData(
     opportunityOverview: {
       headline: brief.recommended_sales_angle,
       bullets: [
-        `${((brief.physical_suitability.roof_area_sqft ?? 0) / 1_000).toFixed(0)}K sqft roof yields approximately ${fmtGal(brief.physical_suitability.annual_capture_gal)} under base-case rainfall assumptions.`,
-        `Annual combined savings of ${fmtUsd(roi.total_annual_savings_usd)} deliver a ${roi.simple_payback_yrs.toFixed(1)}-year payback — after applying a ${fmtUsd(building.incentive_value_usd)} available incentive.`,
+        `${((brief.physical_suitability.roof_area_sqm ?? Math.round((brief.physical_suitability.roof_area_sqft ?? 0) * 0.0929))).toLocaleString()} m² roof yields approximately ${fmtVolumeCapture(brief.physical_suitability)} under base-case rainfall assumptions.`,
+        `Annual combined savings of ${fmtCurrency(totSavings, sym)} deliver a ${roi.simple_payback_yrs.toFixed(1)}-year payback period.`,
         brief.physical_suitability.cooling_tower_detected
-          ? `Cooling tower activity detected at ${cvPct}% CV confidence via satellite — the highest-leverage water consumption signal for blowdown substitution.`
-          : `Roof surface geometry confirmed at ${cvPct}% CV confidence via satellite imagery — direct feed into rainwater reuse system.`,
-        roi.stormwater_fee_avoidance_usd > 0
-          ? `Stormwater fee avoidance of ${fmtUsd(roi.stormwater_fee_avoidance_usd)}/yr is captured independently of water/sewer savings, compressing payback further.`
-          : `Water + sewer combined savings of ${fmtUsd(roi.annual_water_savings_usd + roi.annual_sewer_savings_usd)}/yr form the core financial driver — fully independent of incentive eligibility.`,
+          ? `Cooling tower activity detected at ${cvPct}% CV confidence via satellite — highest-leverage water consumption signal for blowdown substitution.`
+          : `Roof surface geometry confirmed at ${cvPct}% CV confidence via satellite imagery — direct feed into rainwater harvesting and treatment loop.`,
+        stormwaterSavings > 0
+          ? `Stormwater fee avoidance of ${fmtCurrency(stormwaterSavings, sym)}/yr is captured independently of water/sewer savings, compressing payback further.`
+          : `Water + sewer + bowser displacement savings of ${fmtCurrency(totSavings, sym)}/yr form the core financial driver — fully independent of subsidies.`,
       ],
-      context: `${building.metro}, ${building.state} · ${building.building_type.replace(/_/g, " ")} · ${building.annual_rainfall_in}" annual rainfall (NOAA 30-yr avg). Base-case scenario uses standard collection efficiency and current utility rate schedules.`,
+      context: `${building.metro}, ${building.state} · ${building.building_type.replace(/_/g, " ")} · ${building.annual_rainfall_mm ?? 950} mm annual rainfall. Base-case scenario uses standard collection efficiency and current utility rate schedules.`,
     },
 
     financialSnapshot: {
@@ -108,14 +113,14 @@ function toReportData(
       confidenceAdjRoiPct: roi.confidence_adj_roi_pct,
       cvConfidencePct: cvPct,
       savingsBreakdown: [
-        { label: "Water savings",          usd: roi.annual_water_savings_usd },
-        { label: "Sewer savings",          usd: roi.annual_sewer_savings_usd },
-        { label: "Stormwater avoidance",   usd: roi.stormwater_fee_avoidance_usd },
+        { label: "Water savings",          usd: waterSavings },
+        { label: "Sewer savings",          usd: sewerSavings },
+        { label: "Stormwater avoidance",   usd: stormwaterSavings },
         ...(incentiveAmort > 0 ? [{ label: "Incentive amortization", usd: incentiveAmort }] : []),
       ],
       capexRangeLow:  capexLow,
       capexRangeHigh: capexHigh,
-      incentiveUsd:   building.incentive_value_usd,
+      incentiveUsd:   incentiveUsd,
     },
 
     esgResilience: {
@@ -140,16 +145,17 @@ function toReportData(
       steps: [
         { order: "1", action: "Schedule a physical site survey to confirm roof condition, drainage geometry, and cooling tower operational status", owner: "Account Executive", horizon: "Week 1–2" },
         { order: "2", action: "Pull 12-month utility billing history to validate water and sewer rate assumptions", owner: "AE + Customer", horizon: "Week 1" },
-        ...(building.incentive_value_usd > 0
+        ...(incentiveUsd > 0
           ? [{ order: "3", action: "File incentive pre-application to reserve funding allocation — programs are first-come, first-served", owner: "Inside Sales", horizon: "Week 2–3" }]
           : []),
         { order: nextStepOrder(4), action: "Issue binding CapEx quote and updated brief based on site survey findings", owner: "Engineering", horizon: "Week 3–4" },
         { order: nextStepOrder(5), action: "Present final brief to decision-maker with confirmed numbers and binding proposal", owner: "AE + SE", horizon: "Week 4–6" },
       ],
-      closingStatement: `This ${building.building_type.replace(/_/g, " ")} in ${building.metro} represents a ${roi.simple_payback_yrs <= 3 ? "high-urgency" : "strong"} opportunity: ${fmtUsd(roi.total_annual_savings_usd)}/yr in combined savings at a ${roi.simple_payback_yrs.toFixed(1)}-year payback. Moving to site survey is the single highest-value next action to convert this analysis into a binding proposal.`,
+      closingStatement: `This ${building.building_type.replace(/_/g, " ")} in ${building.metro} represents a ${roi.simple_payback_yrs <= 3 ? "high-urgency" : "strong"} opportunity: ${fmtCurrency(totSavings, sym)}/yr in combined savings at a ${roi.simple_payback_yrs.toFixed(1)}-year payback. Moving to site survey is the single highest-value next action to convert this analysis into a binding proposal.`,
     },
   };
 }
+
 
 // ─── Loading / error states ─────────────────────────────────────────────────��─
 

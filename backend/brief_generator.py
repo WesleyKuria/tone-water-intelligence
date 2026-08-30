@@ -72,40 +72,49 @@ def _get_client():
 # ── Prompt builder ────────────────────────────────────────────────────────────
 
 def build_prompt(building: BuildingRecord, roi: ROIResponse, context: str) -> str:
+    sym = roi.currency_symbol
+    cur = roi.currency
+    country = building.country_name
+    use_case = building.use_case_title
+
     return f"""You are an elite Water Infrastructure & Sustainability Engineer writing a decision-grade
-investment brief for a commercial/institutional rainwater harvesting opportunity in Nairobi, Kenya.
-Fill every field with specific, numbers-driven content in Kenyan Shillings (KShs) and metric units (Liters/m³).
+investment brief for a commercial/industrial rainwater harvesting opportunity in {building.metro}, {country}.
+Use Case: {use_case} ({building.use_case_category}).
+Fill every field with specific, numbers-driven content in local currency ({cur} / {sym}) and metric units (Liters/m³).
 
 ## Candidate Building Profile
 - Building: {building.address} ({building.building_type})
-- Location: {building.metro}, {building.county}
+- Location: {building.metro}, {building.state} ({country})
+- Use Case: {use_case}
 - Roof Surface Area: {building.roof_area_sqm:,.0f} m²
 - Cooling Tower Detected: {building.cooling_tower_present} (Satellite Confidence: {building.cv_confidence_score * 100:.0f}%)
-- Annual Local Rainfall: {building.annual_rainfall_mm} mm/yr (Bimodal Nairobi pattern)
+- Annual Local Rainfall: {building.annual_rainfall_mm} mm/yr
+- Utility Provider: {building.utility_provider}
 
 ## ROI & Resilience Model ({roi.scenario} scenario)
 - Harvestable Volume:             {roi.harvestable_liters:,} Liters/year ({roi.harvestable_m3:,.1f} m³/year)
-- Annual Municipal Water Savings: KSh {roi.annual_water_savings_kes:,.0f}
-- Annual Sewer Surcharge Relief:  KSh {roi.annual_sewer_savings_kes:,.0f}
-- Water Bowser (Trucking) Avoided: KSh {roi.annual_bowser_avoidance_kes:,.0f}
-- Total Annual Savings:           KSh {roi.total_annual_savings_kes:,.0f}
-- Estimated System Capex (Mid):   KSh {roi.capex_mid_kes:,.0f}
+- Water Autonomy Buffer:          {roi.water_autonomy_days} days of operational water self-sufficiency
+- Annual Municipal Water Savings: {sym} {roi.annual_water_savings_local:,.0f}
+- Annual Sewer Surcharge Relief:  {sym} {roi.annual_sewer_savings_local:,.0f}
+- Water Bowser / Diesel Avoided:  {sym} {roi.annual_bowser_avoidance_local:,.0f}
+- Total Annual Savings:           {sym} {roi.total_annual_savings_local:,.0f} (${roi.total_annual_savings_usd:,.0f} USD)
+- Estimated System Capex (Mid):   {sym} {roi.capex_mid_local:,.0f} (${roi.capex_mid_usd:,.0f} USD)
 - Simple Payback Period:          {roi.simple_payback_yrs} Years
-- 10-Year Discounted NPV (10%):   KSh {roi.npv_10yr_kes:,.0f}
+- 10-Year Discounted NPV:         {sym} {roi.npv_10yr_local:,.0f} (${roi.npv_10yr_usd:,.0f} USD)
 - Confidence-Adjusted ROI:        {roi.confidence_adj_roi_pct}% (Base ROI × {roi.cv_confidence_pct}% CV confidence)
 - Carbon Abatement:               {roi.co2_offset_kg:,} kg CO₂e/year
 
-## Grounded Kenyan Regulatory & Market Context
+## Grounded Local Regulatory & Market Context
 {context}
 
 ## Instructions
-**why_this_building_now** — Write 2–3 sharp sentences combining NCWSC supply gaps, water trucking costs, roof capture capacity, and SDG 6 impact.
+**why_this_building_now** — Write 2–3 sharp sentences combining municipal water supply challenges, tanker/diesel pumping costs, roof catchment volume, and ESG/EDGE compliance for {country}.
 **recommended_sales_angle** — State the customized value proposition ({building.recommended_angle}).
 **confidence_caveats** — Provide:
 - cv_confidence_pct reflecting satellite detection certainty.
-- key_assumptions: 2–3 load-bearing assumptions (e.g. 950mm bimodal rainfall, KSh 125/m³ tariff).
-- next_validation_step: single highest-value action (e.g. on-site roof inspection and NCWSC billing audit).
-**six_week_action_plan** — Provide 6 weekly bullet points detailing drone LIDAR scan, storage tank sizing, dual plumbing integration, WRA permitting, and commissioning.
+- key_assumptions: 2–3 load-bearing assumptions (e.g. {building.annual_rainfall_mm}mm rainfall, {sym} {building.water_rate_per_m3_local:.1f}/m³ tariff).
+- next_validation_step: single highest-value action (e.g. on-site roof structural audit and utility billing verification).
+**six_week_action_plan** — Provide 6 weekly bullet points detailing drone scan, tank sizing, dual plumbing integration, regulatory sign-off ({building.regulatory_framework}), and commissioning.
 
 Return a complete, sales-ready brief conforming to the schema.
 """
@@ -113,63 +122,70 @@ Return a complete, sales-ready brief conforming to the schema.
 
 # ── Template fallback ─────────────────────────────────────────────────────────
 
-def _fmtkes(n: float) -> str:
-    if n >= 1_000_000: return f"KSh {n/1_000_000:.2f}M"
-    if n >= 1_000:     return f"KSh {n/1_000:.0f}K"
-    return f"KSh {n:,.0f}"
+def _fmt_curr(n: float, sym: str) -> str:
+    if n >= 1_000_000_000: return f"{sym} {n/1_000_000_000:.2f}B"
+    if n >= 1_000_000:     return f"{sym} {n/1_000_000:.2f}M"
+    if n >= 1_000:         return f"{sym} {n/1_000:.0f}K"
+    return f"{sym} {n:,.0f}"
 
 
 def generate_template_brief(building: BuildingRecord, roi: ROIResponse) -> BriefResponse:
     cv_pct    = roi.cv_confidence_pct
     btype     = building.building_type.replace("_", " ").title()
     city      = building.metro
-    savings   = _fmtkes(roi.total_annual_savings_kes)
-    payback   = f"{roi.simple_payback_yrs:.1f}"
-    npv       = _fmtkes(roi.npv_10yr_kes)
-    harvest_l = f"{roi.harvestable_liters:,}"
-    harvest_m3 = f"{roi.harvestable_m3:,.1f}"
+    country   = building.country_name
+    sym       = roi.currency_symbol
+    use_case  = building.use_case_title
+    
+    savings_loc = _fmt_curr(roi.total_annual_savings_local, sym)
+    npv_loc     = _fmt_curr(roi.npv_10yr_local, sym)
+    payback     = f"{roi.simple_payback_yrs:.1f}"
+    harvest_l   = f"{roi.harvestable_liters:,}"
+    harvest_m3  = f"{roi.harvestable_m3:,.1f}"
 
     angle_map = {
-        "cost_savings":    "Utility Tariff & Sewerage Surcharge Reduction",
-        "resilience":      "Water Rationing Resilience & Bowser Disintermediation",
-        "compliance":      "NEMA Water Quality & 2024 Building Code Mandate Compliance",
-        "esg_credibility": "Strathmore Sustainability & SDG 6 Clean Water Leadership",
+        "cost_savings":    f"Utility Tariff & Private Tanker/Self-Supply Cost Displacement ({country})",
+        "resilience":      f"Decentralized Water Security & {roi.water_autonomy_days}-Day Operational Autonomy Buffer",
+        "compliance":      f"Local Catchment By-laws & {building.regulatory_framework or 'National Water Code'} Mandate",
+        "esg_credibility": f"Corporate ESG, SDG 6 Leadership & IFC EDGE Green Building Accreditation",
     }
-    sales_angle = angle_map.get(building.recommended_angle, "Rainwater Resilience & Cost Optimization")
+    sales_angle = angle_map.get(building.recommended_angle, "Decentralized Water Resilience & Cost Optimization")
 
     drivers = building.urgency_drivers or [
-        f"NCWSC rationing cycles in {building.metro}",
-        f"Large {btype} roof surface suitable for high-volume collection",
-        "Rising private water bowser costs during supply cuts",
+        f"Municipal supply rationing and water security risk in {city}",
+        f"High rooftop catchment capacity ({building.roof_area_sqm:,.0f} m²) for {use_case}",
+        f"Avoidance of costly private water delivery and high utility tariffs",
     ]
 
     why_now = (
-        f"{btype} in {city} presents a {savings}/year savings and risk mitigation opportunity with a "
-        f"{payback}-year simple payback at prevailing NCWSC commercial rates and tanker prices. "
-        f"The {building.roof_area_sqm:,.0f} m² roof can harvest {harvest_l} Liters/year ({harvest_m3} m³/yr) "
-        f"at {cv_pct}% CV satellite confidence, yielding a 10-year NPV of {npv}. "
-        f"{drivers[0]} creates urgent justification for immediate system deployment."
+        f"{use_case} at {btype} in {city}, {country} delivers {savings_loc}/year (${roi.total_annual_savings_usd:,.0f} USD/yr) "
+        f"in direct operational savings and risk mitigation with a {payback}-year payback. "
+        f"The {building.roof_area_sqm:,.0f} m² roof captures {harvest_l} Liters/year ({harvest_m3} m³/yr) with {cv_pct}% "
+        f"satellite CV confidence, providing {roi.water_autonomy_days} days of off-grid water autonomy and a 10-year NPV of {npv_loc}. "
+        f"{drivers[0]} underscores the urgency for immediate deployment."
     )
 
     incentive_note = (
-        f"KSh {building.incentive_value_kes:,.0f} sustainability rebate/grant applicable"
-        if building.incentive_value_kes > 0
-        else "Direct utility bill and bowser displacement ROI model"
+        f"{sym} {building.incentive_value_local:,.0f} green rebate / development credit applicable"
+        if building.incentive_value_local > 0
+        else "Direct utility tariff & alternative tanker supply displacement model"
     )
 
     action_plan = [
-        "Week 1: Drone roof LIDAR survey & gutter flow rate verification.",
-        "Week 2: Water consumption audit & NCWSC 12-month billing baseline analysis.",
-        "Week 3: Storage tank sizing (modular underground/surface) & first-flush filtration engineering.",
-        "Week 4: Dual-plumbing schematic design for toilet flushing and non-potable loop integration.",
-        "Week 5: WRA (Water Resources Authority) registration & NEMA EIA checklist sign-off.",
-        "Week 6: System installation, IoT flow sensor calibration, and facility team commissioning."
+        "Week 1: High-resolution drone LIDAR survey & roof catchment integrity inspection.",
+        f"Week 2: Facility water demand audit and {building.utility_provider} 12-month billing reconciliation.",
+        "Week 3: Storage cistern engineering (modular high-density tanks) & multi-stage first-flush filtration design.",
+        "Week 4: Dual-distribution plumbing loop design for cooling tower / non-potable sanitation tie-in.",
+        f"Week 5: Local environmental compliance review ({building.regulatory_framework or 'Water Authority'}).",
+        "Week 6: System commissioning, smart ultrasonic tank telemetry installation, and operational handover."
     ]
 
     return BriefResponse(
         prospect_summary=ProspectSummary(
             address=building.address or f"{btype} · {city}",
-            metro_state=f"{building.metro}, {building.county}",
+            metro_state=f"{building.metro}, {building.state}",
+            country_name=country,
+            use_case_title=use_case,
             building_type=btype,
             viability_score=building.viability_score,
         ),
@@ -179,30 +195,38 @@ def generate_template_brief(building: BuildingRecord, roi: ROIResponse) -> Brief
             cv_confidence_pct=cv_pct,
             annual_capture_liters=roi.harvestable_liters,
             annual_capture_m3=roi.harvestable_m3,
+            water_autonomy_days=roi.water_autonomy_days,
         ),
         financial_snapshot=FinancialSnapshot(
-            total_annual_savings_kes=int(roi.total_annual_savings_kes),
+            currency=roi.currency,
+            currency_symbol=roi.currency_symbol,
+            total_annual_savings_local=int(roi.total_annual_savings_local),
+            total_annual_savings_usd=int(roi.total_annual_savings_usd),
             simple_payback_yrs=roi.simple_payback_yrs,
-            npv_10yr_kes=int(roi.npv_10yr_kes),
+            npv_10yr_local=int(roi.npv_10yr_local),
+            npv_10yr_usd=int(roi.npv_10yr_usd),
             confidence_adj_roi_pct=roi.confidence_adj_roi_pct,
             incentive_flags=incentive_note,
+            total_annual_savings_kes=int(roi.total_annual_savings_local) if roi.currency == "KES" else int(roi.total_annual_savings_usd * 130),
+            npv_10yr_kes=int(roi.npv_10yr_local) if roi.currency == "KES" else int(roi.npv_10yr_usd * 130),
         ),
         why_this_building_now=why_now,
         recommended_sales_angle=sales_angle,
         confidence_caveats=ConfidenceCaveats(
             cv_confidence_pct=cv_pct,
             key_assumptions=(
-                f"1. Nairobi annual rainfall average of {building.annual_rainfall_mm}mm (KMD bimodal data). "
-                f"2. 85% collection efficiency on commercial roof structure. "
-                f"3. NCWSC commercial tariff at KSh {building.water_rate_per_m3_kes:.2f}/m³ and bowser rate at KSh {building.bowser_replacement_rate_per_m3_kes:.2f}/m³."
+                f"1. Local precipitation normal of {building.annual_rainfall_mm}mm/yr. "
+                f"2. 85% roof capture efficiency for commercial sheet/concrete structure. "
+                f"3. Utility tariff benchmark at {sym} {building.water_rate_per_m3_local:.1f}/m³ and replacement rate at {sym} {building.bowser_replacement_rate_per_m3_local:.1f}/m³."
             ),
             next_validation_step=(
-                "Conduct structural load inspection of roof beams and verify 12-month NCWSC utility receipts "
-                f"{'along with HVAC cooling tower blowdown meter logs' if building.cooling_tower_present else ''}."
+                f"Perform structural roof load verification and inspect 12-month utility logs with {building.utility_provider}"
+                f"{' along with cooling tower blowdown meter logs' if building.cooling_tower_present else ''}."
             ),
         ),
         six_week_action_plan=action_plan,
     )
+
 
 
 # ── Gemini generator ──────────────────────────────────────────────────────────

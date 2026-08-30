@@ -1,5 +1,259 @@
 [
   {
+    "state": "Nairobi County",
+    "state_code": "Nairobi County",
+    "country_code": "KE",
+    "market_readiness_score": 96.5,
+    "top_drivers": [
+      "NCWSC Water Rationing Deficit (300M L/day gap)",
+      "High Commercial Tanker Costs (KSh 750/m³)",
+      "Mandatory 2024 Green Building Code"
+    ],
+    "candidate_count": 8,
+    "avg_annual_savings_usd": 48500,
+    "avg_annual_rainfall_in": 37.8,
+    "score_breakdown": {
+      "water_cost_pressure": 95.0,
+      "rainfall_capture": 88.0,
+      "commercial_density": 92.0,
+      "regulatory_pressure": 90.0,
+      "esg_alignment": 95.0
+    },
+    "metros": [
+      {
+        "metro": "Upper Hill",
+        "state_code": "Nairobi County",
+        "market_readiness_score": 95.0,
+        "top_drivers": ["Cooling tower make-up", "Commercial skyscraper density"],
+        "candidate_count": 2
+      },
+      {
+        "metro": "Industrial Area",
+        "state_code": "Nairobi County",
+        "market_readiness_score": 97.0,
+        "top_drivers": ["3-day weekly rationing", "Process water resilience"],
+        "candidate_count": 2
+      },
+      {
+        "metro": "Westlands",
+        "state_code": "Nairobi County",
+        "market_readiness_score": 93.0,
+        "top_drivers": ["High retail water consumption", "Sewer surcharge reduction"],
+        "candidate_count": 2
+      }
+    ]
+  },
+  {
+    "state": "Machakos County",
+    "state_code": "Machakos County",
+    "country_code": "KE",
+    "market_readiness_score": 98.0,
+    "top_drivers": [
+      "EPZ Industrial Water Rationing & Deficit",
+      "High-Volume Textile & Industrial Washing",
+      "Direct Bowser Disintermediation (KSh 900/m³)"
+    ],
+    "candidate_count": 1,
+    "avg_annual_savings_usd": 68000,
+    "avg_annual_rainfall_in": 34.6,
+    "score_breakdown": {
+      "water_cost_pressure": 98.0,
+      "rainfall_capture": 84.0,
+      "commercial_density": 88.0,
+      "regulatory_pressure": 92.0,
+      "esg_alignment": 94.0
+    },
+    "metros": [
+      {
+        "metro": "Athi River",
+        "state_code": "Machakos County",
+        "market_readiness_score": 98.0,
+        "top_drivers": ["EPZ manufacturing", "Tanker replacement"],
+        "candidate_count": 1
+      }
+    ]
+  },
+  {
+    "state": "Kiambu County",
+    "state_code": "Kiambu County",
+    "country_code": "KE",
+    "market_readiness_score": 96.0,
+    "top_drivers": [
+      "Large Logistics Rooftops (>40,000 m²)",
+      "IFC EDGE Advanced Water Reduction Benchmark",
+      "Tatu City Zero-Runoff Master Plan Mandate"
+    ],
+    "candidate_count": 1,
+    "avg_annual_savings_usd": 72000,
+    "avg_annual_rainfall_in": 41.3,
+    "score_breakdown": {
+      "water_cost_pressure": 90.0,
+      "rainfall_capture": 94.0,
+      "commercial_density": 90.0,
+      "regulatory_pressure": 88.0,
+      "esg_alignment": 96.0
+    },
+    "metros": [
+      {
+        "metro": "Tatu City",
+        "state_code": "Kiambu County",
+        "market_readiness_score": 96.0,
+        "top_drivers": ["Eco-logistics", "EDGE certification"],
+        "candidate_count": 1
+      }
+    ]
+  },
+  {
+    "state": "Nakuru County",
+    "state_code": "Nakuru County",
+    "country_code": "KE",
+    "market_readiness_score": 97.0,
+    "top_drivers": [
+      "Horticulture Export Water Purity Standards",
+      "Lake Naivasha Aquifer Abstraction Quotas",
+      "0-TDS Rainwater for High-Value Crops"
+    ],
+    "candidate_count": 1,
+    "avg_annual_savings_usd": 78000,
+    "avg_annual_rainfall_in": 28.3,
+    "score_breakdown": {
+      "water_cost_pressure": 92.0,
+      "rainfall_capture": 80.0,
+      "commercial_density": 85.0,
+      "regulatory_pressure": 98.0,
+      "esg_alignment": 99.0
+    },
+    "metros": [
+      {
+        "metro": "Naivasha",
+        "state_code": "Nakuru County",
+        "market_readiness_score": 97.0,
+        "top_drivers": ["Floriculture", "Aquifer salinity mitigation"],
+        "candidate_count": 1
+      }
+    ]
+  },
+  {
+    "state": "Western Cape",
+    "state_code": "Western Cape",
+    "country_code": "ZA",
+    "market_readiness_score": 95.5,
+    "top_drivers": [
+      "Post-Day Zero Stepped Industrial Water Tariffs",
+      "City Water By-law Mandatory Dual Plumbing",
+      "Corporate ESG & Drought Risk Buffering"
+    ],
+    "candidate_count": 1,
+    "avg_annual_savings_usd": 42000,
+    "avg_annual_rainfall_in": 24.4,
+    "score_breakdown": {
+      "water_cost_pressure": 96.0,
+      "rainfall_capture": 78.0,
+      "commercial_density": 92.0,
+      "regulatory_pressure": 96.0,
+      "esg_alignment": 94.0
+    },
+    "metros": [
+      {
+        "metro": "Epping",
+        "state_code": "Western Cape",
+        "market_readiness_score": 95.5,
+        "top_drivers": ["FMCG logistics", "Tariff penalty avoidance"],
+        "candidate_count": 1
+      }
+    ]
+  },
+  {
+    "state": "Gauteng",
+    "state_code": "Gauteng",
+    "country_code": "ZA",
+    "market_readiness_score": 97.5,
+    "top_drivers": [
+      "Joburg Water Load-Shedding Pumping Outages",
+      "Data Center Evaporative Cooling Demand",
+      "King IV / JSE Sustainability Compliance"
+    ],
+    "candidate_count": 1,
+    "avg_annual_savings_usd": 55000,
+    "avg_annual_rainfall_in": 28.0,
+    "score_breakdown": {
+      "water_cost_pressure": 94.0,
+      "rainfall_capture": 82.0,
+      "commercial_density": 96.0,
+      "regulatory_pressure": 90.0,
+      "esg_alignment": 96.0
+    },
+    "metros": [
+      {
+        "metro": "Midrand",
+        "state_code": "Gauteng",
+        "market_readiness_score": 97.5,
+        "top_drivers": ["Data center uptime", "Evaporative cooling make-up"],
+        "candidate_count": 1
+      }
+    ]
+  },
+  {
+    "state": "Lagos State",
+    "state_code": "Lagos State",
+    "country_code": "NG",
+    "market_readiness_score": 99.0,
+    "top_drivers": [
+      "100% Industrial Self-Supply Deficit",
+      "Massive 1,680mm Tropical Capture Yield",
+      "Diesel Generator Pumping Avoidance (₦2,400/m³)"
+    ],
+    "candidate_count": 1,
+    "avg_annual_savings_usd": 115000,
+    "avg_annual_rainfall_in": 66.1,
+    "score_breakdown": {
+      "water_cost_pressure": 99.0,
+      "rainfall_capture": 99.0,
+      "commercial_density": 95.0,
+      "regulatory_pressure": 88.0,
+      "esg_alignment": 92.0
+    },
+    "metros": [
+      {
+        "metro": "Ikeja",
+        "state_code": "Lagos State",
+        "market_readiness_score": 99.0,
+        "top_drivers": ["FMCG manufacturing", "Diesel pumping avoidance"],
+        "candidate_count": 1
+      }
+    ]
+  },
+  {
+    "state": "Kigali Province",
+    "state_code": "Kigali Province",
+    "country_code": "RW",
+    "market_readiness_score": 96.0,
+    "top_drivers": [
+      "Kigali SEZ Stormwater Retention Regulations",
+      "IFC EDGE Preferential Green Debt Qualification",
+      "Nyabugogo Basin Flash Flood Mitigation"
+    ],
+    "candidate_count": 1,
+    "avg_annual_savings_usd": 38000,
+    "avg_annual_rainfall_in": 40.2,
+    "score_breakdown": {
+      "water_cost_pressure": 92.0,
+      "rainfall_capture": 90.0,
+      "commercial_density": 88.0,
+      "regulatory_pressure": 96.0,
+      "esg_alignment": 98.0
+    },
+    "metros": [
+      {
+        "metro": "Masoro",
+        "state_code": "Kigali Province",
+        "market_readiness_score": 96.0,
+        "top_drivers": ["Eco-industrial park", "IFC EDGE standards"],
+        "candidate_count": 1
+      }
+    ]
+  },
+  {
     "state": "Texas",
     "state_code": "TX",
     "market_readiness_score": 39.0,

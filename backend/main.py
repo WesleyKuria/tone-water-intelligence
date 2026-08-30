@@ -125,8 +125,20 @@ def _inject_imagery(b: BuildingRecord) -> dict:
 
 @app.get("/buildings", response_model=list[BuildingRecord])
 @app.get("/api/buildings", response_model=list[BuildingRecord])
-def list_buildings():
-    return [_inject_imagery(b) for b in BUILDINGS.values()]
+def list_buildings(
+    country: Optional[str] = None,
+    use_case: Optional[str] = None,
+    state: Optional[str] = None
+):
+    results = list(BUILDINGS.values())
+    if country:
+        results = [b for b in results if b.country_code.upper() == country.upper()]
+    if use_case:
+        results = [b for b in results if b.use_case_category.lower() == use_case.lower()]
+    if state:
+        results = [b for b in results if state.lower() in b.state.lower()]
+    return [_inject_imagery(b) for b in results]
+
 
 
 @app.get("/buildings/{building_id}", response_model=BuildingRecord)

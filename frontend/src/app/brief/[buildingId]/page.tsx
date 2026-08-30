@@ -10,16 +10,25 @@ import type { BuildingInfo, ROIResponse, BriefAPIResponse } from "@/types/roi";
 
 // ─── Adapter: map backend response → BriefReportData ─────────────────────────
 
-function fmtUsd(n: number): string {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
-  return `$${n.toLocaleString()}`;
+function fmtCurrency(n: number | undefined, sym = "$"): string {
+  if (n == null) return "N/A";
+  if (n >= 1_000_000_000) return `${sym}${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `${sym}${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `${sym}${Math.round(n / 1_000)}K`;
+  return `${sym}${n.toLocaleString()}`;
 }
 
-function fmtGal(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M gal/yr`;
-  if (n >= 1_000) return `${Math.round(n / 1_000)}K gal/yr`;
-  return `${n.toLocaleString()} gal/yr`;
+function fmtVolumeCapture(bSuit: BriefAPIResponse["physical_suitability"]): string {
+  if (bSuit.annual_capture_m3 != null) {
+    return `${bSuit.annual_capture_m3.toLocaleString()} m³/yr (${((bSuit.annual_capture_m3 * 1000) / 1_000_000).toFixed(1)}M L)`;
+  }
+  if (bSuit.annual_capture_liters != null) {
+    return `${(bSuit.annual_capture_liters / 1000).toFixed(0)} m³/yr`;
+  }
+  const gal = bSuit.annual_capture_gal ?? 0;
+  if (gal >= 1_000_000) return `${(gal / 1_000_000).toFixed(2)}M gal/yr`;
+  if (gal >= 1_000) return `${Math.round(gal / 1_000)}K gal/yr`;
+  return `${gal.toLocaleString()} gal/yr`;
 }
 
 function parseAssumptions(text: string): string[] {
@@ -41,26 +50,25 @@ function toReportData(
   roi: ROIResponse
 ): BriefReportData {
   const cvPct = brief.confidence_caveats.cv_confidence_pct;
-  const capexLow  = building.system_capex_range?.[0] ?? Math.round(roi.capex_mid_usd * 0.82);
-  const capexHigh = building.system_capex_range?.[1] ?? Math.round(roi.capex_mid_usd * 1.18);
-  const incentiveAmort = Math.max(
-    0,
-    roi.total_annual_savings_usd
-      - roi.annual_water_savings_usd
-      - roi.annual_sewer_savings_usd
-      - roi.stormwater_fee_avoidance_usd
-  );
+  const sym = roi.currency_symbol || "$";
+  const totSavings = roi.total_annual_savings_local ?? roi.total_annual_savings_usd ?? 0;
+  const capexMid = roi.capex_mid_local ?? roi.capex_mid_usd ?? 0;
+  const npvVal = roi.npv_10yr_local ?? roi.npv_10yr_usd ?? 0;
+
+  const capexLow  = (building.system_capex_range_local?.[0] ?? building.system_capex_range?.[0]) ?? Math.round(capexMid * 0.82);
+  const capexHigh = (building.system_capex_range_local?.[1] ?? building.system_capex_range?.[1]) ?? Math.round(capexMid * 1.18);
 
   const kpis: FinancialKpi[] = [
-    { label: "Harvestable Gallons", value: fmtGal(brief.physical_suitability.annual_capture_gal), sub: "Annual capture, base efficiency" },
-    { label: "Annual Savings",      value: fmtUsd(roi.total_annual_savings_usd),                  sub: "Water + sewer + stormwater + incentive" },
-    { label: "Simple Payback",      value: `${roi.simple_payback_yrs.toFixed(1)} yrs`,            sub: "After available incentives" },
-    { label: "10-yr NPV",           value: fmtUsd(roi.npv_10yr_usd),                             sub: "5% discount rate" },
+    { label: "Harvestable Volume", value: fmtVolumeCapture(brief.physical_suitability), sub: "Annual yield, base efficiency" },
+    { label: "Annual Savings",      value: fmtCurrency(totSavings, sym),                  sub: "Water + sewer + bowser avoidance" },
+    { label: "Simple Payback",      value: `${roi.simple_payback_yrs.toFixed(1)} yrs`,            sub: "After applicable incentives" },
+    { label: "10-yr NPV",           value: fmtCurrency(npvVal, sym),                             sub: "Discounted cash flow" },
     { label: "Base ROI",            value: `${roi.base_roi_pct.toFixed(1)}%`,                    sub: "10-year horizon" },
     { label: "Confidence-Adj ROI",  value: `${roi.confidence_adj_roi_pct.toFixed(1)}%`,          sub: `Adjusted by ${cvPct}% CV confidence`, highlight: true },
-    { label: "CO₂ Offset",          value: `${(roi.co2_offset_lbs / 1000).toFixed(1)}K lbs/yr`, sub: "3.2 lbs per kgal avoided" },
-    { label: "CapEx Midpoint",      value: fmtUsd(roi.capex_mid_usd),                            sub: `Range: ${fmtUsd(capexLow)} – ${fmtUsd(capexHigh)}` },
+    { label: "CO₂ Offset",          value: `${((roi.co2_offset_kg ?? 0) / 1000).toFixed(1)} tons/yr`, sub: "0.32 kg per m³ avoided" },
+    { label: "CapEx Midpoint",      value: fmtCurrency(capexMid, sym),                            sub: `Range: ${fmtCurrency(capexLow, sym)} – ${fmtCurrency(capexHigh, sym)}` },
   ];
+
 
   const esgBullets = [
     `CV confidence score of ${cvPct}% reflects satellite-derived detection certainty for physical signals including roof geometry${brief.physical_suitability.cooling_tower_detected ? " and cooling tower activity" : ""}.`,

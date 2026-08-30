@@ -21,6 +21,8 @@ export type Filters = {
 };
 
 export type SelectionState = {
+  selectedCountry: string; // "ALL" | "KE" | "ZA" | "NG" | "RW"
+  selectedUseCase: string; // "ALL" | "industrial_tanker_offset" | "cooling_tower_makeup" | "horticulture_agro" | "logistics_warehousing" | "commercial_cre" | "green_sez"
   selectedState: string | null;
   selectedMetro: string | null;
   selectedBuildingId: string | null;
@@ -29,6 +31,8 @@ export type SelectionState = {
 };
 
 const initialSelectionState: SelectionState = {
+  selectedCountry: "ALL",
+  selectedUseCase: "ALL",
   selectedState: null,
   selectedMetro: null,
   selectedBuildingId: null,
@@ -89,6 +93,16 @@ export default function ProspectingDashboard() {
   const filteredBuildings = useMemo(() => {
     let result = buildings;
 
+    // Filter by country
+    if (selection.selectedCountry !== "ALL") {
+      result = result.filter(b => (b.country_code || "KE").toUpperCase() === selection.selectedCountry.toUpperCase());
+    }
+
+    // Filter by use case
+    if (selection.selectedUseCase !== "ALL") {
+      result = result.filter(b => b.use_case_category === selection.selectedUseCase);
+    }
+
     // Filter by selection
     if (selection.selectedMetro) {
       result = result.filter(b => b.metro === selection.selectedMetro);
@@ -99,21 +113,20 @@ export default function ProspectingDashboard() {
     // Filter by toggle states
     const f = selection.filters;
     if (f.roofAboveThreshold) {
-      result = result.filter(b => b.roof_area_sqft > 50000);
+      result = result.filter(b => (b.roof_area_sqm ?? 0) >= 10000 || (b.roof_area_sqft ?? 0) > 50000);
     }
     if (f.coolingTowerOnly) {
       result = result.filter(b => b.cooling_tower_present);
     }
     if (f.highWaterCostOnly) {
-      result = result.filter(b => b.water_rate_per_kgal >= 10.0);
+      result = result.filter(b => (b.water_rate_per_m3_local ?? 0) >= 100.0 || (b.water_rate_per_kgal ?? 0) >= 10.0);
     }
     if (f.esgPrioritizedOnly) {
-      result = result.filter(b => b.sbti_committed || b.leed_certified || (b.esg_score_proxy && b.esg_score_proxy > 80));
+      result = result.filter(b => b.sbti_committed || b.leed_certified || b.edge_certified || (b.esg_score_proxy && b.esg_score_proxy > 80));
     }
 
     return result;
   }, [buildings, selection]);
-
 
   // Action handlers — navigate to dedicated analysis pages
   const handleCalculateRoi = (building: BuildingCandidate) => {
@@ -123,6 +136,7 @@ export default function ProspectingDashboard() {
   const handleGenerateBrief = (building: BuildingCandidate) => {
     router.push(`/brief/${building.building_id}`);
   };
+
 
   // Reset API states when building selection changes
   useEffect(() => {

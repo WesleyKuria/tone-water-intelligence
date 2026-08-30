@@ -247,5 +247,5 @@ saving_water/
 
 ## Authors & Acknowledgments
 
-- **Lead Architect & Developer:** Wesley Kuria
+- **Lead Architect & Developer:** Lionel Okinyi
 - **Tone Team:** Built for water intelligence & decentralized commercial water-reuse acceleration.

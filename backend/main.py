@@ -16,10 +16,12 @@ try:
 except ImportError:
     resend = None
 
+from typing import Optional
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
+
 
 from models import BuildingRecord, ROIRequest, ROIResponse, BriefRequest, BriefResponse
 from roi_engine import calc_scenario

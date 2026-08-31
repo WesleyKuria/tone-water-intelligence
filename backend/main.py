@@ -95,7 +95,8 @@ app.add_middleware(
 
 # Load once at startup — never mutate
 # Drop real buildings.json into data/ to override the stub automatically
-_data_file = Path("data/buildings.json") if Path("data/buildings.json").exists() else Path("data/buildings_stub.json")
+_base_dir = Path(__file__).resolve().parent
+_data_file = (_base_dir / "data" / "buildings.json") if (_base_dir / "data" / "buildings.json").exists() else (_base_dir / "data" / "buildings_stub.json")
 logger.info("Loading buildings from %s", _data_file.resolve())
 _raw = json.loads(_data_file.read_text())
 

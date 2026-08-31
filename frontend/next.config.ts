@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:",
               "worker-src 'self' blob:",
-              "connect-src 'self' https://*.cartocdn.com https://*.basemaps.cartocdn.com https://basemaps.cartocdn.com https://services.arcgisonline.com http://localhost:8000 http://127.0.0.1:8000",
+              "connect-src 'self' https: https://*.cartocdn.com https://*.basemaps.cartocdn.com https://basemaps.cartocdn.com https://services.arcgisonline.com http://localhost:8000 http://127.0.0.1:8000",
               "img-src 'self' data: blob: https://*.cartocdn.com https://*.basemaps.cartocdn.com https://services.arcgisonline.com https://maps.googleapis.com",
               "style-src 'self' 'unsafe-inline' https://*.cartocdn.com https://basemaps.cartocdn.com",
               "font-src 'self' data:",

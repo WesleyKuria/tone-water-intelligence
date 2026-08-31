@@ -156,7 +156,7 @@ def calculate_roi(req: ROIRequest):
         raise HTTPException(status_code=400, detail="scenario must be conservative, base, or upside")
     building = get_building(req.building_id)
     result = calc_scenario(building, req.scenario)
-    return ROIResponse(building_id=req.building_id, scenario=req.scenario, **result)
+    return ROIResponse(**result)
 
 
 @app.post("/brief", response_model=BriefResponse)
@@ -164,7 +164,7 @@ def calculate_roi(req: ROIRequest):
 def generate_investment_brief(req: BriefRequest):
     building = get_building(req.building_id)
     roi_data = calc_scenario(building, "base")
-    roi = ROIResponse(building_id=req.building_id, scenario="base", **roi_data)
+    roi = ROIResponse(**roi_data)
     try:
         return generate_brief(building, roi)
     except ValidationError as e:

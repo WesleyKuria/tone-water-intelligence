@@ -272,9 +272,9 @@ export default function MainMap({ selection, setSelection, filteredBuildings, st
         setTooltip(null);
       });
 
-      map.current!.on("click", "states-fill", (e: any) => {
-        if (!e.features?.length) return;
-        const code = e.features[0].properties.stateCode;
+      map.current!.on("click", "states-fill", (e: { features?: Array<{ properties?: Record<string, unknown> }> }) => {
+        if (!e.features?.length || !e.features[0].properties) return;
+        const code = e.features[0].properties.stateCode as string;
         setSelection(prev => ({
           ...prev,
           selectedState: code,
@@ -290,9 +290,9 @@ export default function MainMap({ selection, setSelection, filteredBuildings, st
       map.current!.on("mouseleave", "buildings-circle", () => {
         map.current!.getCanvas().style.cursor = "";
       });
-      map.current!.on("click", "buildings-circle", (e: any) => {
-        if (!e.features?.length) return;
-        const buildingId = e.features[0].properties.building_id;
+      map.current!.on("click", "buildings-circle", (e: { features?: Array<{ properties?: Record<string, unknown> }> }) => {
+        if (!e.features?.length || !e.features[0].properties) return;
+        const buildingId = e.features[0].properties.building_id as string;
         setSelection(prev => ({
           ...prev,
           selectedBuildingId: buildingId,
@@ -483,21 +483,15 @@ export default function MainMap({ selection, setSelection, filteredBuildings, st
   }, [isMapLoaded, selection.mapMode, selection.selectedMetro, selection.selectedState, selection.selectedBuildingId, filteredBuildings]);
 
   // ── Tooltip positioning ────────────────────────────────────────────────────
-  // Flip to the left when cursor is in the right half of the container to avoid clipping.
-  const containerRef = mapContainer;
-  const tooltipStyle = tooltip
-    ? ((): React.CSSProperties => {
-        const containerWidth = containerRef.current?.offsetWidth ?? 800;
-        const flipX = tooltip.x > containerWidth * 0.6;
-        return {
-          position: "absolute",
-          left:  flipX ? undefined : tooltip.x + 14,
-          right: flipX ? containerWidth - tooltip.x + 14 : undefined,
-          top:   Math.max(8, tooltip.y - 90),
-          zIndex: 20,
-          pointerEvents: "none",
-        };
-      })()
+  const tooltipStyle: React.CSSProperties = tooltip
+    ? {
+        position: "absolute",
+        left: tooltip.x + 14,
+        top: Math.max(8, tooltip.y - 90),
+        zIndex: 20,
+        pointerEvents: "none",
+        transform: tooltip.x > 500 ? "translateX(calc(-100% - 28px))" : undefined,
+      }
     : {};
 
   return (

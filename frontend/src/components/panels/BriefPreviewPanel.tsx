@@ -44,7 +44,7 @@ export default function BriefPreviewPanel({ briefResult, loading, error }: Props
           <div className="text-[10px] uppercase font-bold text-slate-500 mb-1 tracking-widest">Pitch Script</div>
           <div className="border border-white/[0.08] italic p-2 text-xs text-slate-300 rounded-lg"
             style={{ background: "rgba(255,255,255,0.04)" }}>
-            "{briefResult.pitch_script}"
+            &ldquo;{briefResult.pitch_script}&rdquo;
           </div>
         </div>
         <div>

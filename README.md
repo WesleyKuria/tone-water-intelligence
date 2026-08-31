@@ -2,15 +2,15 @@
 
 ### Automated Droplet & Water-Reuse Prospecting Platform
 
-**Tone** transforms commercial rooftop rainwater harvesting and water-reuse prospecting. It identifies commercial and industrial buildings across the continental US that are prime candidates for high-yield rainwater harvesting and decentralized water reuse, ranked by opportunity score and visualized on an interactive national map.
+**Tone** transforms commercial rooftop rainwater harvesting and water-reuse prospecting. It identifies commercial and industrial buildings across key Pan-African commercial hubs (Kenya, South Africa, Nigeria, Rwanda, and beyond) that are prime candidates for high-yield rainwater harvesting, water bowser replacement, and decentralized water reuse, ranked by opportunity score and visualized on an interactive map.
 
-**Lead Architect & Developer:** Wesley Kuria
+**Lead Architect & Developer:** Lionel Okinyi
 
 ---
 
 ## The Problem
 
-Finding the right commercial buildings for water-reuse systems has traditionally been a manual, expensive prospecting process. Enterprise sustainability and sales teams rely on guesswork and cold outreach across millions of potential sites. **Tone** automates that discovery — scoring every large commercial rooftop in 37 states against physical, financial, regulatory, and ESG criteria, then surfacing high-yield opportunities in an actionable interface.
+Finding the right commercial buildings for water-reuse systems has traditionally been a manual, expensive prospecting process. Enterprise sustainability and sales teams rely on guesswork and cold outreach across millions of potential sites. **Tone** automates that discovery — scoring large commercial and industrial rooftops across regional hubs against physical, financial, regulatory, and ESG criteria, then surfacing high-yield opportunities in an actionable interface.
 
 ---
 
@@ -26,7 +26,7 @@ Finding the right commercial buildings for water-reuse systems has traditionally
 8. **Calculates financial ROI** — three-scenario engine (conservative / base / upside) with CV-confidence-adjusted returns
 9. **Delivers pitch-ready briefs** — Gemini RAG brief rendered as a structured 7-section investment deliverable, exportable and emailable as a PDF
 
-**Output:** 11,577 pre-scored candidate buildings across 37 states, ready for immediate prospecting.
+**Output:** Pre-scored commercial and industrial assets across Pan-African growth corridors, ready for immediate prospecting.
 
 ---
 
@@ -53,7 +53,7 @@ s07  CV layer (optional)           → CLIP confidence scores per building
 Loads `buildings.json` once at startup into memory. All endpoints are sub-millisecond reads except `/brief` and `/email-brief`.
 
 | Endpoint | Description |
-|----------|-------------|
+| ---------- | ------------- |
 | `GET /buildings` | Full building list with satellite imagery URLs injected per building |
 | `GET /buildings/{id}` | Single building lookup by ID |
 | `POST /roi` | Three-scenario ROI engine (conservative / base / upside) — harvestable gallons, CAPEX, NPV, payback, CV-confidence-adjusted ROI |
@@ -75,7 +75,7 @@ Loads `buildings.json` once at startup into memory. All endpoints are sub-millis
 ### Building Viability Score (0–100)
 
 | Dimension | Weight | What it measures |
-|-----------|--------|-----------------|
+| ----------- | -------- | ----------------- |
 | Physical | 25% | Roof area tier + cooling tower presence |
 | Financial | 25% | Annual water + sewer savings vs local utility rates |
 | Regulatory | 20% | State incentive environment, stormwater fees |
@@ -91,7 +91,7 @@ Composite of drought risk index, water rate pressure, stormwater fee activity, a
 Weighted from pipeline sub-scores that vary by state:
 
 | Sub-score | Weight |
-|-----------|--------|
+| ----------- | -------- |
 | Water cost pressure | 38% |
 | Rainfall capture potential | 31% |
 | Regulatory / incentive tailwind | 31% |
@@ -104,7 +104,7 @@ Tiers: **Prime** (75+) · **Strong** (60–75) · **Moderate** (48–60) · **Em
 ## Data Sources
 
 | Data | Source | Used for |
-|------|--------|----------|
+| ------ | -------- | ---------- |
 | Building footprints | Microsoft USBuildingFootprints (129M buildings) | Roof geometry, lat/lng |
 | Geometry classification | OpenStreetMap (embedded in MS footprints) | Building type tags |
 | Cooling tower proxy | EPA Facility Registry Service (FRS) | NAICS-based facility matching |
@@ -149,10 +149,12 @@ Includes a **template fallback** (no API call) so demos never fail on quota limi
 ## Current Coverage
 
 ```
-37 states  ·  11,577 scored buildings
-AL AR AZ CA CO GA IA ID IN KY LA ME MI MN MO
-MS MT NC ND NE NM NV NY OH OK OR PA SC SD TN
-TX UT VA WA WI WV WY
+Pan-African Industrial & Commercial Hubs:
+- Kenya (Nairobi, Machakos, Kiambu, Nakuru, Naivasha)
+- South Africa (Cape Town, Johannesburg, Midrand, Epping)
+- Nigeria (Lagos, Ikeja, Lekki Industrial)
+- Rwanda (Kigali, KSEZ Eco-Industrial Park)
+- Regional expansion: Ghana, Uganda, Tanzania
 ```
 
 ---
@@ -160,11 +162,13 @@ TX UT VA WA WI WV WY
 ## Running Locally
 
 ### Prerequisites
+
 - Python 3.11+, Node 18+
 - Google Maps API key (satellite imagery)
 - Google Gemini API key (AI briefs, optional)
 
 ### Backend
+
 ```bash
 cd backend
 python -m venv venv && source venv/bin/activate  # On Windows: .\venv\Scripts\activate
@@ -178,6 +182,7 @@ uvicorn main:app --reload --port 8000
 ```
 
 ### Frontend
+
 ```bash
 cd frontend
 npm install
@@ -185,6 +190,7 @@ npm run dev        # → http://localhost:3000
 ```
 
 ### Pipeline (re-run scoring only)
+
 ```bash
 cd pipeline
 source venv/bin/activate  # On Windows: .\venv\Scripts\activate
@@ -232,7 +238,7 @@ saving_water/
     ├── src/
     │   ├── app/                        ← Next.js pages (map, roi, brief, presentation)
     │   ├── components/
-    │   │   ├── team/Team.tsx           ← Team component with Wesley Kuria & teammates
+    │   │   ├── team/Team.tsx           ← Team component with Lionel Okinyi & teammates
     │   │   ├── map/MainMap.tsx         ← MapLibre choropleth + building markers
     │   │   ├── dashboard/              ← prospecting dashboard layout
     │   │   ├── panels/                 ← building profile, ROI, brief panels
@@ -247,5 +253,6 @@ saving_water/
 
 ## Authors & Acknowledgments
 
-- **Lead Architect & Developer:** Wesley Kuria
+- **Lead Architect & Developer:** Lionel Okinyi
+- **Data Scientist:** Marylynn Wanjiru
 - **Tone Team:** Built for water intelligence & decentralized commercial water-reuse acceleration.

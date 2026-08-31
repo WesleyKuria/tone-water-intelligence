@@ -57,8 +57,6 @@ const ACTIVE_COL_HEADER: Record<Scenario, string> = {
   upside:       "text-emerald-700 border-b-2 border-emerald-400",
 };
 
-type RowType = "section" | "row";
-
 interface SectionRow { type: "section"; label: string }
 interface DataRow {
   type: "row";

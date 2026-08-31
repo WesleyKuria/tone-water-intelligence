@@ -310,7 +310,7 @@ export default function BriefReport({ data }: { data: BriefReportData }) {
                 SEC 10-K / ESG Filing Excerpt
               </p>
               <p className="text-sm text-slate-600 italic leading-relaxed">
-                "{data.esgResilience.secFilingSnippet}"
+                &ldquo;{data.esgResilience.secFilingSnippet}&rdquo;
               </p>
             </div>
           )}

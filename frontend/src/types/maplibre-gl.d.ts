@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare namespace maplibregl {
   export class Map {
     constructor(options?: any);
